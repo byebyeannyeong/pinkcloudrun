@@ -1,6 +1,6 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Pink Cloud Run V23 — Bold Bitmap Clear Screens</title><style>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Pink Cloud Run V25 — Name Input</title><style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#779bd0;touch-action:none}body{display:grid;place-items:center}canvas{display:block;width:min(100vw,56.28vh);height:min(100vh,177.68vw);image-rendering:pixelated;touch-action:none}#cover{position:fixed;inset:0;display:grid;place-items:center;background:#36436985;z-index:4}#panel{width:min(90vw,405px);max-height:88vh;overflow:auto;padding:24px 18px 26px;text-align:center;background:#ffe8f1;border:5px solid #fff9f4;outline:4px solid #a87899;box-shadow:9px 9px 0 #665777;color:#775675;display:flex;flex-direction:column;align-items:center;gap:13px}#panel h1{margin:0;width:100%}#panel p{margin:0;line-height:1.6}#panel button{border:4px solid #fffaf6;outline:3px solid #ad789b;box-shadow:5px 5px 0 #8c6385;background:#f3b3d0;color:#67466b;padding:12px 17px;cursor:pointer;min-width:178px;touch-action:manipulation}#panel button:active{transform:translate(4px,4px);box-shadow:1px 1px 0 #8c6385} .pixel-line{display:block;max-width:100%;height:auto;image-rendering:pixelated}#logo{width:100%;max-width:310px;height:auto;image-rendering:pixelated}#pixel-stars{height:34px;width:100%;image-rendering:pixelated}#panel .small{opacity:.9}
-#panel .bitmap-heading{width:100%;max-width:355px;margin:0 auto}#panel .bitmap-heading img{max-height:110px;object-fit:contain}#panel .bitmap-button{width:min(100%,310px);padding:13px 12px;display:flex;align-items:center;justify-content:center}#panel .bitmap-button img{max-height:37px;object-fit:contain}#panel .bitmap-label{image-rendering:pixelated}</style></head><body><canvas id="game" width="941" height="1672"></canvas><div id="cover"><div id="panel"><div id="pixel-stars"></div><div id="logo"></div><p id="instructions"></p><button id="play"><span id="playLabel"></span></button></div></div><script>
+#panel .bitmap-heading{width:100%;max-width:355px;margin:0 auto}#panel .bitmap-heading img{max-height:110px;object-fit:contain}#panel .bitmap-button{width:min(100%,310px);padding:13px 12px;display:flex;align-items:center;justify-content:center}#panel .bitmap-button img{max-height:37px;object-fit:contain}#panel .bitmap-label{image-rendering:pixelated}#credit{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:170px;z-index:5;pointer-events:none;filter:drop-shadow(2px 2px 0 #775675)}#credit img{width:100%;image-rendering:pixelated}#panel input{width:90%;max-width:245px;padding:12px;background:#fff9f4;color:#67466b;border:4px solid #b781a0;text-align:center;font-size:18px;font-weight:bold;outline:none}#panel .rank-row{display:flex;justify-content:space-between;width:100%;font-size:13px;border-bottom:1px dotted #c995b2;padding:4px 0}#panel .rank-list{width:100%;max-height:230px;overflow:auto}#panel .secondary-button{background:#f8dce8;padding:7px 10px;min-width:150px}</style></head><body><canvas id="game" width="941" height="1672"></canvas><div id="cover"><div id="panel"><div id="pixel-stars"></div><div id="logo"></div><p id="instructions"></p><button id="play"><span id="playLabel"></span></button></div></div><script>
 const C=document.getElementById('game'),c=C.getContext('2d'),cover=document.getElementById('cover'),panel=document.getElementById('panel');c.imageSmoothingEnabled=false;
 const W=941,H=1672;
 function load(src){const im=new Image();im.src=src;return im;}
@@ -155,6 +155,8 @@ function menuPanel(title,description,button,action,logo=false){
  const d=document.createElement('p');d.className='small';d.innerHTML=description;p.appendChild(d);
  const b=document.createElement('button');b.className='bitmap-button';b.setAttribute('aria-label',button);b.appendChild(bitmapImage(button,6,'#fff9ed','#885477'));b.onclick=action;p.appendChild(b);
  cover.style.display='grid';
+ const oldCredit=document.getElementById('credit');if(oldCredit)oldCredit.remove();
+ if(logo){appendButton('TOP 10',showRanks);const credit=document.createElement('div');credit.id='credit';credit.appendChild(bitmapImage('made by doh',3,'#ffffff','#85517e'));cover.appendChild(credit);}
 }
 
 let mode='menu',stage=1,hearts=3,elapsed=0,travel=0,obstacles=[],jump=0,vy=0,holding=false,holdSec=0,invul=0,prev=0,gait=0,transitionTime=0,transitionStage=1;
@@ -192,12 +194,79 @@ function resetStage(){
  }
 }
 
-function start(){stage=1;hearts=3;elapsed=0;resetStage();mode='play';cover.style.display='none';}
+function hideCover(){cover.style.display='none';document.getElementById('credit')?.remove();}
+function start(){stage=1;hearts=3;elapsed=0;resetStage();mode='play';hideCover();}
 function dialog(title,message,button,fn){mode='pause';menuPanel(title,message,button,fn);}
-menuPanel('PINK CLOUD RUN','SPACE / TOUCH 로 점프<br>짧게 누르면 낮게, 길게 누르면 높게!<br>하얀 펜스를 넘어 빛나는 GOAL까지 달려요.','START GAME',start,true);
-function down(e){if(e.target?.tagName==='BUTTON'||e.repeat||e.code&&e.code!=='Space')return;e.preventDefault();if(mode!=='play'||holding)return;holding=true;holdSec=0;if(jump===0){jump=.01;vy=JUMP.impulse;}}
+menuPanel('PINK CLOUD RUN','SPACE / TOUCH 로 점프!<br>짧게 누르면 낮게, 길게 누르면 높게 뛰어요.<br>하얀 펜스를 넘어 빛나는 GOAL까지 달려요!','START GAME',start,true);
+
+// Shared online leaderboard via Supabase REST. The publishable key is public by design.
+const SUPABASE_URL='https://bsnjybmktpuofbnmioxg.supabase.co';
+const SUPABASE_KEY='sb_publishable_c6tc53oCzE5ZvqwlXuTSOw_787mgwNl';
+const RANK_API=SUPABASE_URL+'/rest/v1/leaderboard';
+const rankHeaders={'apikey':SUPABASE_KEY,'Content-Type':'application/json'};
+const homeMenu=()=>{mode='menu';menuPanel('PINK CLOUD RUN','SPACE / TOUCH 로 점프!<br>짧게 누르면 낮게, 길게 누르면 높게 뛰어요.<br>하얀 펜스를 넘어 빛나는 GOAL까지 달려요!','START GAME',start,true);};
+async function fetchRanks(){
+ const query='?select=player_name,clear_time_ms,created_at,id,stage_reached,progress_pct,completed&order=completed.desc,stage_reached.desc,progress_pct.desc,clear_time_ms.asc,created_at.desc,id.desc&limit=10';
+ const response=await fetch(RANK_API+query,{headers:rankHeaders,cache:'no-store'});
+ if(!response.ok)throw new Error('HTTP '+response.status);
+ return await response.json();
+}
+async function saveRank(name,seconds,finished=false,reachedStage=stage,progress=0){
+ const safeName=Array.from(name.trim()).slice(0,10).join('');
+ if(!safeName)throw new Error('이름을 입력해 주세요.');
+ const ms=Math.max(1000,Math.round(seconds*1000));
+ const payload={player_name:safeName,clear_time_ms:ms,completed:finished,stage_reached:reachedStage,progress_pct:finished?100:Math.min(99,Math.max(0,Math.floor(progress)))};
+ const response=await fetch(RANK_API,{method:'POST',headers:{...rankHeaders,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
+ if(!response.ok)throw new Error('HTTP '+response.status);
+}
+function recordInput(saveButton,seconds,finished,progress){
+ const input=document.createElement('input');input.type='text';input.maxLength=10;input.placeholder='PLAYER NAME';input.autocomplete='off';
+ input.addEventListener('focus',()=>{input.placeholder='';});input.addEventListener('blur',()=>{if(!input.value.trim())input.placeholder='PLAYER NAME';});
+ panel.insertBefore(input,saveButton);
+ const message=document.createElement('p');message.className='small';panel.insertBefore(message,saveButton);
+ saveButton.onclick=async()=>{
+  const name=Array.from(input.value.trim()).slice(0,10).join('');if(!name){input.focus();return;}
+  saveButton.disabled=true;message.textContent='기록을 등록하는 중...';
+  try{await saveRank(name,seconds,finished,stage,progress);showRanks();}
+  catch(err){message.textContent='등록에 실패했어요. Supabase 설정과 인터넷 연결을 확인해 주세요.';saveButton.disabled=false;}
+ };
+}
+function showGameOver(){
+ const last=obstacles.length?obstacles[obstacles.length-1].distance+250:1;
+ const progress=Math.min(99,Math.max(0,Math.floor(travel/last*100)));
+ mode='gameover';menuPanel('GAME OVER','STAGE '+stage+' · '+progress+'% 진행<br>명예의 전당에 도전해 보세요!','SAVE RECORD',()=>{});
+ recordInput(panel.querySelector('button'),elapsed,false,progress);
+ appendButton('RETRY',()=>{hearts=3;resetStage();mode='play';hideCover();});
+ appendButton('HOME',homeMenu);
+}
+function appendButton(text,fn){
+ const b=document.createElement('button');b.className='bitmap-button secondary-button';b.appendChild(bitmapImage(text,4,'#fff9ed','#885477'));b.onclick=fn;panel.appendChild(b);
+}
+async function showRanks(){
+ mode='rank';menuPanel('TOP 10','모두가 함께 만드는 명예의 전당','HOME',homeMenu);
+ mode='rank';const list=document.createElement('div');list.className='rank-list';
+ list.textContent='기록을 불러오는 중...';panel.insertBefore(list,panel.querySelector('button'));
+ try{
+  const ranks=await fetchRanks();
+  if(mode!=='rank'||!list.isConnected)return;
+  list.textContent='';
+  if(!ranks.length)list.textContent='아직 기록이 없어요.';
+  ranks.forEach((r,i)=>{
+   const row=document.createElement('div');row.className='rank-row';
+   const n=document.createElement('span');n.textContent=(i+1)+'. '+r.player_name;
+   const t=document.createElement('span');t.textContent=r.completed?(r.clear_time_ms/1000).toFixed(2)+'s':('S'+r.stage_reached+' · '+r.progress_pct+'%');
+   row.append(n,t);list.appendChild(row);
+  });
+ }catch(err){if(list.isConnected){list.textContent='온라인 순위를 불러오지 못했어요.';const retry=document.createElement('button');retry.textContent='RELOAD';retry.onclick=showRanks;list.appendChild(retry);}}
+}
+function showAllClear(){
+ mode='allclear';menuPanel('ALL CLEAR!','모든 스테이지를 클리어했어요!<br>기록: '+elapsed.toFixed(2)+'초<br>명예의 전당에 이름을 남겨보세요.','SAVE RECORD',()=>{});
+ recordInput(panel.querySelector('button'),elapsed,true,100);
+ appendButton('SKIP',showRanks);
+}
+function down(e){if(e.repeat||e.code&&e.code!=='Space')return;if(mode==='menu'&&e.target?.tagName!=='BUTTON'){e.preventDefault();start();return;}if(e.target?.tagName==='BUTTON'||e.target?.tagName==='INPUT')return;if(mode!=='play')return;e.preventDefault();if(holding)return;holding=true;holdSec=0;if(jump===0){jump=.01;vy=JUMP.impulse;}}
 function up(e){if(e.code&&e.code!=='Space')return;e.preventDefault();holding=false;}
-addEventListener('keydown',down);addEventListener('keyup',up);C.addEventListener('pointerdown',down);addEventListener('pointerup',up);addEventListener('pointercancel',up);addEventListener('blur',()=>holding=false);
+addEventListener('keydown',down);cover.addEventListener('pointerdown',e=>{if(mode==='menu'&&!e.target.closest('button')){e.preventDefault();start();}});addEventListener('keyup',up);C.addEventListener('pointerdown',down);addEventListener('pointerup',up);addEventListener('pointercancel',up);addEventListener('blur',()=>holding=false);
 function rect(x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.ceil(w),Math.ceil(h));}
 // Perspective calibrated to the lane in the approved background image.
 // The path narrows toward the goal; each fence grows in BOTH width and height
@@ -260,8 +329,8 @@ function hud(){
 function render(t){rect(0,0,W,H,'#80a8d9');if(bg.complete&&bg.naturalWidth)c.drawImage(bg,0,0,W,H);
  const visible=obstacles.filter(o=>!o.passed&&o.distance-travel>-100&&o.distance-travel<5000).sort((a,b)=>b.distance-a.distance);
  for(const o of visible){const d=o.distance-travel;arrow(d-speeds[stage-1]*(o.high?.46:.31));drawFence(o,d);}
- const going=mode==='transition';const progress=going?Math.min(1,transitionTime/1.65):0;const riderScale=going?1-.81*progress:1;const riderY=going?1430-1060*progress:1430;const bob=jump?0:Math.sin(gait*Math.PI*2)*10;const shadowW=100-Math.min(30,jump*.12);if(!going)rect(470-shadowW/2,1430,shadowW,7,'#7e9d78');
- if(invul<=0||Math.floor(t*10)%2===0){
+ const going=mode==='transition';const progress=going?Math.min(1,transitionTime/1.72):0;const riderScale=going?Math.max(0,1-.96*progress):1;const riderY=going?1430-1060*progress:1430;const bob=jump?0:Math.sin(gait*Math.PI*2)*10;const shadowW=100-Math.min(30,jump*.12);if(!going)rect(470-shadowW/2,1430,shadowW,7,'#7e9d78');
+ if((!going||transitionTime<1.72)&&(invul<=0||Math.floor(t*10)%2===0)){
    // Keep the ORIGINAL full-width legs; never shear, crop, or stretch them.
    const idx=Math.floor(gait*8)%frames.length,im=frames[idx];
    if(im.complete&&im.naturalWidth){
@@ -272,15 +341,40 @@ function render(t){rect(0,0,W,H,'#80a8d9');if(bg.complete&&bg.naturalWidth)c.dra
  }
  hud();
  if(going){
-   const p=Math.min(1,transitionTime/3.15),grow=Math.max(0,(p-.26)/.74);
-   // Pixel-square portal radiance expands outward, without a blur filter.
-   c.save();c.globalAlpha=Math.min(.97,grow*.95);
-   for(let ring=11;ring>=0;ring--){let radius=50+grow*1800*(1-ring/12);c.fillStyle=ring%2?'#fff9e8':'#fffdf6';const blocks=32;for(let a=0;a<blocks;a++){let angle=a/blocks*Math.PI*2,xx=470+Math.cos(angle)*radius,yy=365+Math.sin(angle)*radius;let size=Math.max(6,Math.round(8+grow*27));c.fillRect(Math.round(xx/size)*size,Math.round(yy/size)*size,size,size)}}
-   c.restore();
-   if(p>.62){c.fillStyle=`rgba(255,255,255,${Math.min(1,(p-.62)/.30)})`;c.fillRect(0,0,W,H)}
-   if(p<.72)heavyBitmapText(stage===5?'ALL CLEAR!':'STAGE '+stage+' CLEAR!',W/2,Math.round(H*.43),7,'#fff5d9','#773b76');
+   // The rider reaches the portal and disappears BEFORE the screen turns white.
+   const light=Math.max(0,Math.min(1,(transitionTime-1.78)/1.17));
+   if(light>0){
+     c.save();c.globalAlpha=Math.min(1,light);
+     const block=28;
+     for(let layer=0;layer<7;layer++){
+       const radius=light*1700*(1-layer*.095);
+       c.fillStyle=layer%2?'#fff7dd':'#ffffff';
+       for(let a=0;a<44;a++){
+         const theta=a/44*Math.PI*2;
+         const xx=Math.round((470+Math.cos(theta)*radius)/block)*block;
+         const yy=Math.round((366+Math.sin(theta)*radius)/block)*block;
+         c.fillRect(xx,yy,block,block);
+       }
+     }
+     c.restore();
+     c.fillStyle=`rgba(255,255,255,${Math.min(1,Math.max(0,(light-.28)/.62))})`;
+     c.fillRect(0,0,W,H);
+   }
+   if(transitionTime<1.45)heavyBitmapText('STAGE '+stage+' CLEAR!',W/2,Math.round(H*.43),6,'#fff5d9','#773b76');
  }
- if(mode==='fadein'){c.fillStyle=`rgba(255,255,255,${Math.max(0,1-transitionTime/.8)})`;c.fillRect(0,0,W,H)}
+ if(mode==='stageIntro'){
+   c.fillStyle='#ffffff';c.fillRect(0,0,W,H);
+   const a=Math.min(1,transitionTime/.3,Math.max(0,(2.5-transitionTime)/.4));
+   c.globalAlpha=a;
+   heavyBitmapText('STAGE '+stage,W/2,Math.round(H*.43),9,'#f3a0c5','#8b527d');
+   canvasPixelText('READY!',W/2,Math.round(H*.53),5,'#9e6898','#fff0f8');
+   c.globalAlpha=1;
+ }
+ if(mode==='fadein'){
+   c.fillStyle=`rgba(255,255,255,${Math.max(0,1-transitionTime/.9)})`;
+   c.fillRect(0,0,W,H);
+ }
+
 }
 function loop(now){let dt=Math.min(.04,(now-prev)/1000||0);prev=now;
  if(mode==='play'){
@@ -288,12 +382,13 @@ function loop(now){let dt=Math.min(.04,(now-prev)/1000||0);prev=now;
   if(holding&&jump>0){holdSec+=dt;if(holdSec<JUMP.boostDuration&&vy>0)vy+=JUMP.boost*dt;}
   if(jump>0){jump+=vy*dt;vy-=JUMP.gravity*dt;if(jump<=0){jump=0;vy=0;}}
   const speed=speeds[stage-1],old=travel;travel+=speed*dt;gait+=speed*dt/540*3.2;
-  for(const o of obstacles){if(o.passed)continue;if(old<o.distance&&travel>=o.distance){o.passed=true;const required=o.high?JUMP.highClearance:JUMP.lowClearance;if(jump<required&&invul<=0){hearts--;invul=1.15;if(hearts<=0)dialog('GAME OVER','하트가 모두 사라졌어요.','RETRY',()=>{hearts=3;resetStage();mode='play';cover.style.display='none'})}}}
+  for(const o of obstacles){if(o.passed)continue;if(old<o.distance&&travel>=o.distance){o.passed=true;const required=o.high?JUMP.highClearance:JUMP.lowClearance;if(jump<required&&invul<=0){hearts--;invul=1.15;if(hearts<=0){showGameOver();}}}}
   if(obstacles.every(o=>o.passed)&&travel>obstacles.at(-1).distance+250){mode='transition';transitionTime=0;holding=false;}
  }else if(mode==='transition'){
   transitionTime+=dt;gait+=speeds[stage-1]*dt/540*3.2;
-  if(transitionTime>=3.15){if(stage===5){mode='pause';menuPanel('ALL CLEAR!','빛나는 문을 통과했어요!<br>모든 스테이지 클리어!','PLAY AGAIN',start);}else{stage++;resetStage();mode='fadein';transitionTime=0;}}
- }else if(mode==='fadein'){transitionTime+=dt;if(transitionTime>=.8)mode='play';}
+  if(transitionTime>=3.15){if(stage===5){showAllClear();}else{stage++;resetStage();mode='stageIntro';transitionTime=0;}}
+ }else if(mode==='stageIntro'){transitionTime+=dt;if(transitionTime>=2.5){mode='fadein';transitionTime=0;}}
+ else if(mode==='fadein'){transitionTime+=dt;if(transitionTime>=.9)mode='play';}
  render(now/1000);requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 </script></body></html>
